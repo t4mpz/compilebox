@@ -1,19 +1,16 @@
-pub mod lib;
-
-struct Package {
+pub struct Package {
     Id: String,
     Name: String,
     Active: bool,
-    Builders: String[],
-    Movers: String[],
-    Fetchers: String[],
-    Placers: String[],
+    Builders: Vec<String>,
+    Movers: Vec<String>,
+    Fetchers: Vec<String>,
+    Placers: Vec<String>,
     Options: Options,
     ExecPath: String,
-    LogPath: String,
-};
+    LogPath: String
+}
 
-// These pipes options mean they can be executed in paralell
 struct Options {
     pBuilders: bool,
     pMovers: bool,
@@ -21,4 +18,4 @@ struct Options {
     pPlacers: bool,
     Debug: bool,
     DebugLogPath: Option<String>
-};
+}
