@@ -10,19 +10,15 @@ pub fn read_package_file(path: &str) -> Result<HashMap<String, String>, Box<dyn 
 
     file.read_to_string(&mut contents)?;
 
-    let lines: Vec<&str> = contents.split('\n').collect();
+    let lines = contents.split('\n');
+    let lines = lines.filter(| line | line.contains("=") || line.chars().next().unwrap_or('#') != '#');
+    let values = lines.map(| line: &str | {
+        let splitted: Vec<&str> = line.split('=').collect();
+        let str_values = splitted.into_iter().map(|y: &str| String::from(y)).collect::<Vec<String>>();
+        return (str_values[0].clone(), str_values[1..].join("="));
+    });
 
-    let mut results: HashMap<String, String> = HashMap::new();
-
-    for &line in &lines {
-        if line.contains("=") {
-            let splitted_options: Vec<&str> = line.split("=").collect();
-
-            let str_values = splitted_options.into_iter().map(|y: &str| String::from(y)).collect::<Vec<String>>();
-
-            results.insert(str_values[0].clone(), str_values[1].clone());
-        }
-    }
+    let results: HashMap<String, String> = HashMap::from_iter(values);
 
     Ok(results)
 }
