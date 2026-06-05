@@ -3,6 +3,7 @@ use std::error;
 use std::fmt;
 
 
+#[derive(Debug, Clone)]
 pub struct Package {
     Id: String,
     Name: String,
@@ -26,7 +27,6 @@ impl fmt::Display for InvalidPackageFile {
 }
 
 impl error::Error for InvalidPackageFile {}
-
 
 impl Package {
     fn from_hash(&mut self, hash: HashMap<String, String>, opt: Options) -> Result<(), Box<dyn error::Error>> {
@@ -66,10 +66,12 @@ impl Package {
             },
             None => return Err(InvalidPackageFile.into())
         }
-        match hash.get("Options") {
-            Some(options) => {
-                self.Options = options.split(",").map(|b: &str| String::from(b)).collect()
-            },
+        match hash.get("ExecPath") {
+            Some(execpath) => self.ExecPath = execpath.clone(),
+            None => return Err(InvalidPackageFile.into())
+        }
+        match hash.get("LogPath") {
+            Some(logpath) => self.LogPath = logpath.clone(),
             None => return Err(InvalidPackageFile.into())
         }
 
@@ -79,6 +81,7 @@ impl Package {
     }
 }
 
+#[derive(Debug, Clone)]
 struct Options {
     pBuilders: bool,
     pMovers: bool,
@@ -92,15 +95,43 @@ struct Options {
 struct InvalidOptions;
 
 impl fmt::Display for InvalidOptions {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<fmt::Display> {
-        write!(f, "Invalid options received inside package")
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Invalid Package File received")
     }
 }
 
-impl error::Error for InvalidOptions;
 
-// TODO
+impl error::Error for InvalidOptions {}
+
 impl Options {
-    fn 
-};
+    fn from_struct(&mut self, opt: HashMap<String, String>) -> Result<(), Box<dyn error::Error>> {
+        match opt.get("pBuilders") {
+            Some(p_builders) => self.pBuilders = p_builders == "true",
+            None => return Err(InvalidOptions.into()),
+        }
+        match opt.get("pMovers") {
+            Some(p_movers) => self.pMovers = p_movers == "true",
+            None => return Err(InvalidOptions.into()),
+        }
+        match opt.get("pFetchers") {
+            Some(p_fetchers) => self.pFetchers = p_fetchers == "true",
+            None => return Err(InvalidOptions.into()),
+        }
+        match opt.get("pPlacers") {
+            Some(p_placers) => self.pPlacers = p_placers == "true",
+            None => return Err(InvalidOptions.into()),
+        }
+        match opt.get("Debug") {
+            Some(debug) => self.Debug = debug == "true",
+            None => return Err(InvalidOptions.into()),
+        }
+        match opt.get("DebugLogPath") {
+            Some(debug_log_path) => self.DebugLogPath = Some(debug_log_path.clone()),
+            None => self.DebugLogPath = None
+        }
+
+
+        Ok(())
+    }
+}
 
