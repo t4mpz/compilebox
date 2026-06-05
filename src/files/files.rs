@@ -2,8 +2,6 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 
-
-
 pub fn read_package_file(path: &str) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
     let mut file = File::open(path)?;
     let mut contents = String::new();
@@ -14,8 +12,7 @@ pub fn read_package_file(path: &str) -> Result<HashMap<String, String>, Box<dyn 
     let lines = lines.filter(| line | line.contains("=") || line.chars().next().unwrap_or('#') != '#');
     let values = lines.map(| line: &str | {
         let splitted: Vec<&str> = line.split('=').collect();
-        let str_values = splitted.into_iter().map(|y: &str| String::from(y)).collect::<Vec<String>>();
-        return (str_values[0].clone(), str_values[1..].join("="));
+        return (String::from(splitted[0]), splitted[1..].join("="));
     });
 
     let results: HashMap<String, String> = HashMap::from_iter(values);
