@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
+use std::hash::Hash;
 
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct Package {
     Id: String,
     Name: String,
@@ -14,7 +14,8 @@ pub struct Package {
     Placers: Vec<String>,
     Options: Options,
     ExecPath: String,
-    LogPath: String
+    LogPath: String,
+    Hash: Option<String>
 }
 
 #[derive(Debug, Clone)]
@@ -74,14 +75,19 @@ impl Package {
             Some(logpath) => self.LogPath = logpath.clone(),
             None => return Err(InvalidPackageFile.into())
         }
+        self.Hash = hash.get("Hash").cloned();
 
         self.Options = opt;
 
         Ok(())
     }
+    
 }
 
-#[derive(Debug, Clone)]
+
+
+
+#[derive(Debug, Clone, Hash)]
 struct Options {
     pBuilders: bool,
     pMovers: bool,
@@ -90,6 +96,7 @@ struct Options {
     Debug: bool,
     DebugLogPath: Option<String>
 }
+
 
 #[derive(Debug, Clone)]
 struct InvalidOptions;
@@ -125,11 +132,7 @@ impl Options {
             Some(debug) => self.Debug = debug == "true",
             None => return Err(InvalidOptions.into()),
         }
-        match opt.get("DebugLogPath") {
-            Some(debug_log_path) => self.DebugLogPath = Some(debug_log_path.clone()),
-            None => self.DebugLogPath = None
-        }
-
+        self.DebugLogPath = opt.get("DebugLogPath").cloned();
 
         Ok(())
     }
