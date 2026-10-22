@@ -3,6 +3,34 @@ use std::error;
 use std::fmt;
 use std::hash::Hash;
 
+#[derive(Hash, Clone, Debug)]
+pub enum CommandType {
+    Shell,
+    GitClone,
+    GitPull,
+}
+
+#[derive(Debug, Clone)]
+struct InvalidCommandTypeOption;
+
+impl fmt::Display for InvalidCommandTypeOption {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Invalid command type received")
+    }
+}
+
+
+impl error::Error for InvalidCommandTypeOption {}
+
+pub fn string_to_command_type(cmdType: String) -> Result<CommandType, Box<dyn error::Error>> {
+    match cmdType.as_str() {
+       "Shell" => Ok(CommandType::Shell),
+       "gitClone" => Ok(CommandType::GitClone),
+       "gitPull" => Ok(CommandType::GitPull),
+        _ => Err(InvalidCommandTypeOption.into())
+    }
+}
+
 #[derive(Debug, Clone, Hash)]
 pub struct Package {
     Id: String,
@@ -85,14 +113,19 @@ impl Package {
 }
 
 
-
-
 #[derive(Debug, Clone, Hash)]
-struct Options {
-    pBuilders: bool,
-    pMovers: bool,
-    pFetchers: bool,
-    pPlacers: bool,
+pub struct Options {
+    shellModeBuilders: String,
+    shellModeMovers: String,
+    shellModeFetchers: String,
+    shellModePlacers: String,
+
+
+    CommandTypeBuild: CommandType,
+    CommandTypeMove: CommandType,
+    CommandTypeFetch: CommandType,
+    CommandTypePlace: CommandType,
+
     Debug: bool,
     DebugLogPath: Option<String>
 }
@@ -112,24 +145,40 @@ impl error::Error for InvalidOptions {}
 
 impl Options {
     fn from_struct(&mut self, opt: HashMap<String, String>) -> Result<(), Box<dyn error::Error>> {
-        match opt.get("pBuilders") {
-            Some(p_builders) => self.pBuilders = p_builders == "true",
+        match opt.get("shellModeBuilders") {
+            Some(p_builders) => self.shellModeBuilders = p_builders.clone(),
             None => return Err(InvalidOptions.into()),
         }
-        match opt.get("pMovers") {
-            Some(p_movers) => self.pMovers = p_movers == "true",
+        match opt.get("shellModeMovers") {
+            Some(p_movers) => self.shellModeMovers = p_movers.clone(),
             None => return Err(InvalidOptions.into()),
         }
-        match opt.get("pFetchers") {
-            Some(p_fetchers) => self.pFetchers = p_fetchers == "true",
+        match opt.get("shellModeFetchers") {
+            Some(p_fetchers) => self.shellModeFetchers = p_fetchers.clone() ,
             None => return Err(InvalidOptions.into()),
         }
-        match opt.get("pPlacers") {
-            Some(p_placers) => self.pPlacers = p_placers == "true",
+        match opt.get("shellModePlacers") {
+            Some(p_placers) => self.shellModePlacers = p_placers.clone(),
+            None => return Err(InvalidOptions.into()),
+        } 
+        match opt.get("CommandTypeBuild") {
+            Some(t_builders) => self.CommandTypeBuild = string_to_command_type(t_builders.clone()).unwrap(),
+            None => return Err(InvalidOptions.into()),
+        }
+        match opt.get("CommandTypeMove") {
+            Some(t_movers) => self.CommandTypeMove= string_to_command_type(t_movers.clone()).unwrap(),
+            None => return Err(InvalidOptions.into()),
+        }
+        match opt.get("CommandTypeFetch") {
+            Some(t_fetchers) => self.CommandTypeFetch= string_to_command_type(t_fetchers.clone()).unwrap() ,
+            None => return Err(InvalidOptions.into()),
+        }
+        match opt.get("CommandTypePlace") {
+            Some(t_placers) => self.CommandTypePlace= string_to_command_type(t_placers.clone()).unwrap(),
             None => return Err(InvalidOptions.into()),
         }
         match opt.get("Debug") {
-            Some(debug) => self.Debug = debug == "true",
+            Some(debug) => self.Debug = debug == "true" ,
             None => return Err(InvalidOptions.into()),
         }
         self.DebugLogPath = opt.get("DebugLogPath").cloned();
@@ -137,4 +186,5 @@ impl Options {
         Ok(())
     }
 }
+
 

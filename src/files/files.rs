@@ -23,7 +23,7 @@ pub fn read_file_as_struct(path: &str) -> Result<HashMap<String, String>, Box<dy
 pub fn read_file(path: &str) -> Result<String, Box<dyn std::error::Error>> {
     let mut file = File::open(path)?;
     let mut contents = String::new();
-    file.read_to_string(&mut contents);
+    let _ = file.read_to_string(&mut contents);
 
     Ok(contents)
 }

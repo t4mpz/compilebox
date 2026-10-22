@@ -4,18 +4,20 @@
 // the hash checks if the file has been overwritten or not
 //
 
-use std::hash::{DefaultHasher, Hash};
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::file;
 use std::io::Read;
 use crate::commands::package::Package;
 
 
 
-fn hash_string(contents: String) -> Result<String, Box<dyn std::error::Error>> {
+pub fn hash_string(contents: String) -> Result<String, Box<dyn std::error::Error>> {
     let mut hasher = DefaultHasher::new();
     let hashed_contents = contents.clone();
     hashed_contents.hash(&mut hasher);
 
-    Ok(hashed_contents)
+    let result: String = hasher.finish().to_string();
+
+    Ok(result)
 }
 

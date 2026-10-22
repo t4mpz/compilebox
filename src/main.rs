@@ -10,6 +10,7 @@ mod files {
 }
 
 use std::hash::{Hash, Hasher, DefaultHasher};
+use files::lazy::hash_string;
 
 #[derive(Hash)]
 struct Content {
@@ -44,4 +45,5 @@ fn main() {
 
     println!("Struct: {:?}", calculate_hash(&scontent));
     println!("Str: {:?}", calculate_hash(&str_content));
+    println!("Internal Fn: {:?}", hash_string(str_content).unwrap());
 }
